@@ -1,0 +1,21 @@
+# 克隆主仓库
+git clone https://github.com/Linux-on-droid/vendor_lindroid
+cd vendor_lindroid
+
+# 初始化子模块（如有）
+git submodule update --init --recursive
+
+# 编译原生二进制文件（lindroid 守护进程等）
+cd native
+ndk-build          # 需要 Android NDK 在 PATH 中
+cd ..
+
+# 打包 Magisk 模块
+cd magisk_module
+zip -r9 ../Lindroid.zip * -x "*.git*"
+cd ..
+
+# 编译 APK
+cd app
+./gradlew assembleRelease
+# 生成的 APK 位于 app/build/outputs/apk/release/
