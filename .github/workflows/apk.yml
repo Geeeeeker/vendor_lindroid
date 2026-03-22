@@ -1,0 +1,79 @@
+name: Build Lindroid Magisk Module
+
+
+on:
+  workflow_dispatch:
+
+
+permissions:
+  contents: write
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout vendor_lindroid
+        uses: actions/checkout@v4
+        with:
+          repository: Geeeeeker/vendor_lindroid
+          ref: lindroid-23.1
+
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+
+      - name: Set up Android NDK
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r26d
+          add-to-path: true
+
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+
+      - name: Prepare local.properties
+        run: |
+          echo "sdk.dir=$ANDROID_HOME" > app/local.properties
+          echo "ndk.dir=$ANDROID_NDK_HOME" >> app/local.properties
+
+
+      - name: Build APK
+        run: |
+          if [ -d "app" ]; then
+            cd app
+            chmod +x gradlew
+            ./gradlew assembleRelease
+            cd ..
+            cp app/build/outputs/apk/release/*.apk Lindroid.apk
+          else
+            echo "No app directory found, skipping APK build."
+          fi
+
+
+      - name: Package Magisk module
+        run: |
+          if [ -d "magisk_module" ]; then
+            cd magisk_module
+            zip -r9 ../Lindroid-Magisk.zip *
+            cd ..
+          else
+            echo "No magisk_module directory found, skipping module packaging."
+          fi
+
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            Lindroid-Magisk.zip
+            Lindroid.apk
+          tag_name: lindroid-${{ github.run_number }}
+          name: "Lindroid Build #${{ github.run_number }}"
+          prerelease: true
