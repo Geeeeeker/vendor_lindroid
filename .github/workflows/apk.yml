@@ -56,23 +56,10 @@ jobs:
             echo "No app directory found, skipping APK build."
           fi
 
-
-      - name: Package Magisk module
-        run: |
-          if [ -d "magisk_module" ]; then
-            cd magisk_module
-            zip -r9 ../Lindroid-Magisk.zip *
-            cd ..
-          else
-            echo "No magisk_module directory found, skipping module packaging."
-          fi
-
-
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            Lindroid-Magisk.zip
             Lindroid.apk
           tag_name: lindroid-${{ github.run_number }}
           name: "Lindroid Build #${{ github.run_number }}"
