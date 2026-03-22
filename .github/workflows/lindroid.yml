@@ -1,5 +1,5 @@
 # 克隆主仓库
-git clone https://github.com/Linux-on-droid/vendor_lindroid
+git clone https://github.com/Geeeeeker/vendor_lindroid
 cd vendor_lindroid
 
 # 初始化子模块（如有）
