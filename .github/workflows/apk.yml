@@ -1,10 +1,10 @@
 name: Build Lindroid APK
 
 on:
-  workflow_dispatch:  # 手动触发
+  workflow_dispatch:
 
 permissions:
-  contents: write     # 允许创建 Release 和上传资产
+  contents: write
 
 jobs:
   build:
@@ -15,7 +15,7 @@ jobs:
         with:
           repository: Geeeeeker/vendor_lindroid
           ref: lindroid-23.1
-          fetch-depth: 1  # 只拉取最新提交，加快速度
+          fetch-depth: 1
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -32,6 +32,17 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Create dummy keystore.properties
+        run: |
+          # 创建 keystore.properties 文件，内容使用默认 debug 签名信息
+          cat > app/keystore.properties << EOF
+          storeFile=debug.keystore
+          storePassword=android
+          keyAlias=androiddebugkey
+          keyPassword=android
+          EOF
+          echo "Created dummy keystore.properties"
+
       - name: Build APK (debug)
         run: |
           if [ -d "app" ]; then
@@ -39,7 +50,6 @@ jobs:
             chmod +x gradlew
             ./gradlew assembleDebug
             cd ..
-            # 查找生成的 debug APK 并重命名
             apk_path=$(find app/build/outputs/apk -name "*.apk" | head -n 1)
             if [ -f "$apk_path" ]; then
               cp "$apk_path" Lindroid.apk
